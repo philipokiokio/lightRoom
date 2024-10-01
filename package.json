@@ -1,0 +1,16 @@
+
+{
+
+  "main": "main.go",
+
+  "private": true,
+  "scripts": {
+    "serve": "nodemon --exec go run main.go --signal SIGTERM"
+  },
+  "configNodemon": {
+    "ext": "go",
+    "execMap": {
+      "go": "go run main.go"
+    }
+  }
+}

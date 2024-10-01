@@ -1,0 +1,304 @@
+definitions:
+  models.User:
+    properties:
+      email:
+        type: string
+      is_verified:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+      user_id:
+        type: string
+    type: object
+  schemas.AccessPayload:
+    properties:
+      access_token:
+        type: string
+      account_verified:
+        type: boolean
+      refresh_token:
+        type: string
+    required:
+    - access_token
+    - refresh_token
+    type: object
+  schemas.AccessTokenPayload:
+    properties:
+      access_token:
+        type: string
+    required:
+    - access_token
+    type: object
+  schemas.EmailPayload:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  schemas.ErrorPayload:
+    properties:
+      detail:
+        type: string
+    type: object
+  schemas.LoginPayload:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 15
+        type: string
+    required:
+    - email
+    type: object
+  schemas.LogoutPayload:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    required:
+    - access_token
+    - refresh_token
+    type: object
+  schemas.MessagePayload:
+    properties:
+      message:
+        type: string
+    type: object
+  schemas.PasswordResetPayload:
+    properties:
+      password:
+        maxLength: 15
+        type: string
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  schemas.TokenPayload:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  schemas.UserPayload:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        maxLength: 15
+        type: string
+    required:
+    - email
+    - name
+    type: object
+host: localhost:9090
+info:
+  contact:
+    email: mailme@neemistudio.xyz
+    name: philip
+    url: http://www.neemistudio.xyz
+  description: This is a Go server for a spin of shutterstock built by Philip.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: LightRoom API
+  version: "2.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: The Root server of lightRoom
+      produces:
+      - application/json
+      responses: {}
+      summary: The Root server of lightRoom
+      tags:
+      - root
+  /api/v1/auth/account-verification:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.TokenPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.MessagePayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: VerifyAccount
+      tags:
+      - Auth
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ForgetPassword Payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.EmailPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.MessagePayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: ForgotPassword
+      tags:
+      - Auth
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login Payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.LoginPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.AccessPayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: Login
+      tags:
+      - Auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Logout Payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.LogoutPayload'
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: Logout
+      tags:
+      - Auth
+  /api/v1/auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: Me
+      tags:
+      - Auth
+  /api/v1/auth/refresh:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.AccessTokenPayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: Refresh
+      tags:
+      - Auth
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: PasswordReset Payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.PasswordResetPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.MessagePayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: PasswordReset
+      tags:
+      - Auth
+  /api/v1/auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create User Payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.UserPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      summary: Create a New User
+      tags:
+      - Auth
+swagger: "2.0"
