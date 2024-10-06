@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -32,5 +33,16 @@ func TimeOfReqRespCycle(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(resWriter, request)
 
+	})
+}
+
+func BearerTokenMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		authHeader := request.Header.Get("Authorization")
+
+		if authHeader != "" && !strings.HasPrefix(authHeader, "Bearer ") {
+			request.Header.Set("Authorization", "Bearer "+authHeader)
+		}
+		next.ServeHTTP(writer, request)
 	})
 }

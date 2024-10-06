@@ -2,14 +2,13 @@ package cache
 
 import (
 	"github.com/redis/go-redis/v9"
-	"lightRoom/utils"
 	"log"
 )
 
 var LRedis *redis.Client
 
-func RedisInit() {
-	urlRedis := utils.Settings.RedisDsn
+func RedisInit(redisDSN string) {
+	urlRedis := redisDSN //utils.Settings.RedisDsn
 
 	//if urlRedis == "" {
 	//	log.Fatal("REDIS_URL env variable not set")

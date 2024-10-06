@@ -11,6 +11,7 @@ import (
 	"lightRoom/models"
 	"lightRoom/schemas"
 	"lightRoom/utils"
+	"log"
 	"net/http"
 )
 
@@ -173,7 +174,6 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 	}
 	accessToken := utils.GenerateAccessToken(user.ID)
 	refreshToken := utils.GenerateRefreshToken(user.ID)
-
 	jsonResponse, _ := json.Marshal(map[string]string{"access_token": accessToken, "refresh_token": refreshToken, "account_verified": "verified"})
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
@@ -185,10 +185,12 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 // @Tags Auth
 // @Summary Me
 // @Produce json
+// @Security BearerAuth
 // @Router /api/v1/auth/me [get]
 // @Success  200  {object}  models.User
 // @Failure      400  {object} schemas.ErrorPayload
 func Me(writer http.ResponseWriter, request *http.Request) {
+
 	userID := request.Context().Value("user_id").(string)
 
 	parsedUUID, err := uuid.Parse(userID)
@@ -259,10 +261,11 @@ func Verify(writer http.ResponseWriter, request *http.Request) {
 // Auth godoc
 // @Tags Auth
 // @Summary Refresh
+// @Param Refresh header string true "token"
 // @Produce json
 // @Router /api/v1/auth/refresh [post]
 // @Success  200  {object} schemas.AccessTokenPayload
-// @Failure      400  {object} schemas.ErrorPayload
+// @Failure  400  {object} schemas.ErrorPayload
 func Refresh(writer http.ResponseWriter, request *http.Request) {
 	refreshToken := request.Header.Get("Refresh")
 
@@ -292,6 +295,7 @@ func Refresh(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	jsonResponse, _ := json.Marshal(map[string]string{"access_token": accessToken})
+	log.Println(jsonResponse)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(jsonResponse)
@@ -302,6 +306,7 @@ func Refresh(writer http.ResponseWriter, request *http.Request) {
 // @Summary Logout
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param user body schemas.LogoutPayload true "Logout Payload"
 // @Router /api/v1/auth/logout [post]
 // @Failure      400  {object} schemas.ErrorPayload

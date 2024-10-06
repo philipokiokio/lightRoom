@@ -216,6 +216,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/schemas.ErrorPayload'
+      security:
+      - BearerAuth: []
       summary: Logout
       tags:
       - Auth
@@ -232,11 +234,19 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/schemas.ErrorPayload'
+      security:
+      - BearerAuth: []
       summary: Me
       tags:
       - Auth
   /api/v1/auth/refresh:
     post:
+      parameters:
+      - description: token
+        in: header
+        name: Refresh
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -301,4 +311,9 @@ paths:
       summary: Create a New User
       tags:
       - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

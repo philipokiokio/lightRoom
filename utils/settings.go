@@ -33,7 +33,6 @@ func EnvInit() {
 	Settings.MailPassword = os.Getenv("MAIL_PASSWORD")
 	Settings.MailFrom = os.Getenv("MAIL_FROM")
 
-
 	validate = validator.New()
 	err := validate.Struct(Settings)
 

@@ -32,8 +32,9 @@ func registerAPI(router *chi.Mux) {
 
 		// Protected Routes (within the same /api/v1/auth block)
 		router.Group(func(router chi.Router) {
+			router.Use(utils.BearerTokenMiddleware)
 			// AUTH MIDDLEWARE
-			router.Use(jwtauth.Verify(utils.TokenAuth))
+			router.Use(jwtauth.Verifier(utils.TokenAuth))
 			// AUTHENTICATOR
 			router.Use(utils.LightRoomTicator)
 
@@ -71,6 +72,9 @@ func rootHandler(writer http.ResponseWriter, request *http.Request) {
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host localhost:9090
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	//LOADING ENVIRONMENTAL VARIABLES
 	err := godotenv.Load()
@@ -83,7 +87,9 @@ func main() {
 	db.Init()
 	models.Init()
 	//Redis InIt
-	cache.RedisInit()
+	cache.RedisInit(utils.Settings.RedisDsn)
+	//Auth Init
+	utils.AuthInit()
 	// Initialize the validator instance
 	api.InitializeValidator()
 	//API ROUTER
@@ -121,7 +127,9 @@ func main() {
 		return
 	})
 
-	baseRouter.Get("/docs/*", httpSwagger.Handler(httpSwagger.URL("http://localhost:9090/docs/doc.json"))) //The url pointing to API definition
+	swaggerDocUrl := fmt.Sprintf("http://localhost:%v/docs/doc.json", utils.Settings.Port)
+
+	baseRouter.Get("/docs/*", httpSwagger.Handler(httpSwagger.URL(swaggerDocUrl))) //The url pointing to API definition
 
 	port := utils.Settings.Port
 	log.Printf("Listening on port :%s", port)
