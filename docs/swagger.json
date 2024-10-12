@@ -329,6 +329,107 @@
                     }
                 }
             }
+        },
+        "/api/v1/misc/delete-file": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Misc"
+                ],
+                "summary": "DeleteFile",
+                "parameters": [
+                    {
+                        "description": "DeleteFile Payload",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemas.DeletePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.ErrorPayload"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/misc/upload-file": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Misc"
+                ],
+                "summary": "UploadFile",
+                "parameters": [
+                    {
+                        "enum": [
+                            "PROFILE",
+                            "PORTFOLIO"
+                        ],
+                        "type": "string",
+                        "description": "Type of the file",
+                        "name": "fileType",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Files to upload",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.ErrorPayload"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -377,6 +478,14 @@
             ],
             "properties": {
                 "access_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.DeletePayload": {
+            "type": "object",
+            "properties": {
+                "file": {
                     "type": "string"
                 }
             }

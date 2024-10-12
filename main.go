@@ -43,6 +43,19 @@ func registerAPI(router *chi.Mux) {
 		})
 
 	})
+	router.Route("/api/v1/misc", func(router chi.Router) {
+
+		router.Group(func(router chi.Router) {
+			router.Use(utils.BearerTokenMiddleware)
+			// AUTH MIDDLEWARE
+			router.Use(jwtauth.Verifier(utils.TokenAuth))
+			// AUTHENTICATOR
+			router.Use(utils.LightRoomTicator)
+			router.Post("/upload-file", api.UploadFile)
+			router.Post("/delete-file", api.DeleteFile)
+		})
+
+	})
 
 }
 

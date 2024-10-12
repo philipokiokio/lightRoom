@@ -21,18 +21,13 @@ func AuthInit() {
 }
 
 func GenerateAccessToken(userId uuid.UUID) string {
-	var JwtSecret string = Settings.JwtSecret
 
-	TokenAuth = jwtauth.New("HS256", []byte(JwtSecret), nil)
 	_, tokenString, _ := TokenAuth.Encode(map[string]interface{}{"user_id": userId,
 		"exp": time.Now().Add(time.Hour * 24).Unix()})
 	return tokenString
 }
 
 func GenerateRefreshToken(userId uuid.UUID) string {
-	var JwtSecret string = Settings.JwtSecret
-
-	TokenAuth = jwtauth.New("HS256", []byte(JwtSecret), nil)
 
 	_, tokenString, _ := TokenAuth.Encode(map[string]interface{}{"user_id": userId,
 		"exp": time.Now().Add(time.Hour * 48).Unix()})

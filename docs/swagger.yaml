@@ -31,6 +31,11 @@ definitions:
     required:
     - access_token
     type: object
+  schemas.DeletePayload:
+    properties:
+      file:
+        type: string
+    type: object
   schemas.EmailPayload:
     properties:
       email:
@@ -311,6 +316,70 @@ paths:
       summary: Create a New User
       tags:
       - Auth
+  /api/v1/misc/delete-file:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: DeleteFile Payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.DeletePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      security:
+      - BearerAuth: []
+      summary: DeleteFile
+      tags:
+      - Misc
+  /api/v1/misc/upload-file:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Type of the file
+        enum:
+        - PROFILE
+        - PORTFOLIO
+        in: query
+        name: fileType
+        required: true
+        type: string
+      - description: Files to upload
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.ErrorPayload'
+      security:
+      - BearerAuth: []
+      summary: UploadFile
+      tags:
+      - Misc
 securityDefinitions:
   BearerAuth:
     in: header

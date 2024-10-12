@@ -7,3 +7,7 @@ type ErrorPayload struct {
 type MessagePayload struct {
 	Message string `json:"message"`
 }
+
+type DeletePayload struct {
+	File string `json:"file"`
+}
