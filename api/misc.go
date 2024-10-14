@@ -18,7 +18,7 @@ const maxUploadFile = 10 << 20
 // @Produce json
 // @Security BearerAuth
 // @Param fileType query string true "Type of the file" Enums(PROFILE, PORTFOLIO)
-// @Param files formData file true "Files to upload" multiple=true
+// @Param files formData []file true "Files to upload" multiple=true
 // @Router /api/v1/misc/upload-file [post]
 // @Success  200  {object} []string
 // @Failure      400  {object} schemas.ErrorPayload
@@ -51,7 +51,6 @@ func UploadFile(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 		defer file.Close()
-
 		cloudFlareURL, err := utils.UploadPictures(fileHeader.Filename, uploadFilePath, file)
 
 		if err != nil {

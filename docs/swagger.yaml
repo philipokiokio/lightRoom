@@ -357,11 +357,14 @@ paths:
         name: fileType
         required: true
         type: string
-      - description: Files to upload
+      - collectionFormat: csv
+        description: Files to upload
         in: formData
+        items:
+          type: file
         name: files
         required: true
-        type: file
+        type: array
       produces:
       - application/json
       responses:

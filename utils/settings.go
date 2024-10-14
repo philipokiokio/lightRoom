@@ -22,6 +22,7 @@ type EnvSetting struct {
 	CloudFlareAccountID       string `validate:"required"`
 	CloudFlareAccessKeyID     string `validate:"required"`
 	CloudFlareAccessSecretKey string `validate:"required"`
+	CloudFlareCdnUrl          string `validate:"required"`
 }
 
 var Settings EnvSetting
@@ -46,6 +47,7 @@ func EnvInit() {
 	Settings.CloudFlareAccessSecretKey = os.Getenv("CLOUDFLARE_ACCESS_SECRET_KEY")
 	Settings.CloudFlareAccountID = os.Getenv("CLOUDFLARE_ACCOUNT_ID")
 	Settings.CloudFlareAccessKeyID = os.Getenv("CLOUDFLARE_ACCESS_KEY_ID")
+	Settings.CloudFlareCdnUrl = os.Getenv("CLOUDFLARE_CDN_URL")
 
 	validate = validator.New()
 	err := validate.Struct(Settings)

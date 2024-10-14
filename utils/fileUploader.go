@@ -24,8 +24,6 @@ func UploadPictures(fileName, uploadFilePath string, file io.Reader) (string, er
 			"",                                 // No session token
 		),
 	)
-	fmt.Println(Settings.CloudFlareAccountID, // Cloudflare Access Key ID
-		Settings.CloudFlareAccessSecretKey)
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithCredentialsProvider(r2Credentials),
@@ -40,7 +38,6 @@ func UploadPictures(fileName, uploadFilePath string, file io.Reader) (string, er
 			return aws.Endpoint{}, &aws.EndpointNotFoundError{}
 		})),
 	)
-	fmt.Println(cfg)
 	if err != nil {
 		log.Println("unable to load SDK config, " + err.Error())
 
@@ -50,21 +47,21 @@ func UploadPictures(fileName, uploadFilePath string, file io.Reader) (string, er
 	uploadKey := fmt.Sprintf("%s/%s/%s", Settings.Environment, uploadFilePath, fileName)
 	_, err = client.PutObject(context.TODO(),
 		&s3.PutObjectInput{
-			Bucket: aws.String(Settings.CloudFlareBucket),
-			Key:    aws.String(uploadKey),
-			Body:   file,
+			Bucket:      aws.String(Settings.CloudFlareBucket),
+			Key:         aws.String(uploadKey),
+			Body:        file,
+			ContentType: aws.String("image/png"),
 		})
 
 	if err != nil {
 		log.Println("Unable to upload file %v", err)
 		return "", err
 	}
-	cloudflareURL := fmt.Sprintf("%s/%s", Settings.CloudFlareBucketUrl, uploadKey)
+	cloudflareURL := fmt.Sprintf("%s/%s", Settings.CloudFlareCdnUrl, uploadKey)
 	return cloudflareURL, nil
 }
 
 func DeletePicture(fileURL string) error {
-	//cfg, err := config.LoadDefaultConfig(context.TODO())
 
 	// Configure credentials using the credentials package
 	r2Credentials := aws.NewCredentialsCache(
@@ -74,8 +71,6 @@ func DeletePicture(fileURL string) error {
 			"",                                 // No session token
 		),
 	)
-	fmt.Println(Settings.CloudFlareAccountID, // Cloudflare Access Key ID
-		Settings.CloudFlareAccessSecretKey)
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithCredentialsProvider(r2Credentials),
@@ -90,12 +85,16 @@ func DeletePicture(fileURL string) error {
 			return aws.Endpoint{}, &aws.EndpointNotFoundError{}
 		})),
 	)
+	if err != nil {
+		log.Println("unable to load SDK config, " + err.Error())
 
+		return err
+	}
 	// Create S3 client
 	client := s3.NewFromConfig(cfg)
 
 	// Extract the key from the file URL by stripping the bucket's base URL
-	baseURL := fmt.Sprintf("%s/%s/", Settings.CloudFlareBucketUrl, Settings.CloudFlareBucket)
+	baseURL := fmt.Sprintf("%s/", Settings.CloudFlareBucketUrl)
 	key := strings.TrimPrefix(fileURL, baseURL)
 	// Delete the file from S3
 	_, err = client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{

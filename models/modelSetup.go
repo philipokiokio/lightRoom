@@ -4,5 +4,5 @@ import "lightRoom/db"
 
 func Init() {
 	// Auto Migrate
-	db.Db.AutoMigrate(&User{})
+	db.Db.AutoMigrate(&User{}, &Tag{}, &Portfolio{})
 }
