@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/jwt"
-	"lightRoom/cache"
+	"lightRoom/pkg/cache"
 	"net/http"
 	"strings"
 	"time"

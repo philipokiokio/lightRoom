@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"lightRoom/db"
+	"lightRoom/pkg/db"
 )
 
 type Role string

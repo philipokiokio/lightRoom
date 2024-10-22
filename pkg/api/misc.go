@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"github.com/go-playground/validator/v10"
 	"io/ioutil"
-	"lightRoom/schemas"
-	"lightRoom/utils"
+	"lightRoom/pkg/schemas"
+	"lightRoom/pkg/utils"
 	"net/http"
 )
 

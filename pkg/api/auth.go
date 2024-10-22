@@ -7,20 +7,13 @@ import (
 	"github.com/google/uuid"
 	"html/template"
 	"io/ioutil"
-	"lightRoom/cache"
-	"lightRoom/models"
-	"lightRoom/schemas"
-	"lightRoom/utils"
+	"lightRoom/pkg/cache"
+	"lightRoom/pkg/models"
+	"lightRoom/pkg/schemas"
+	"lightRoom/pkg/utils"
 	"log"
 	"net/http"
 )
-
-var validate *validator.Validate
-
-// InitializeValidator initializes the validator instance.
-func InitializeValidator() {
-	validate = validator.New()
-}
 
 // Auth godoc
 // @Tags Auth
@@ -38,19 +31,14 @@ func CreateUser(writer http.ResponseWriter, request *http.Request) {
 
 	err = json.Unmarshal(body, &userPayload)
 	if err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusUnprocessableEntity)
-		writer.Write([]byte(`{"detail": "user body not valid"}`))
+		utils.JSONResponse(writer, "user body not valid", http.StatusUnprocessableEntity)
 		return
 	}
 
 	err = validate.Struct(userPayload)
 	if err != nil {
 		validationError := err.(validator.ValidationErrors)
-		jsonResponse, _ := json.Marshal(map[string]string{"detail": validationError.Error()})
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
-		writer.Write(jsonResponse)
+		utils.JSONResponse(writer, validationError.Error(), http.StatusBadRequest)
 		return
 
 	}
@@ -58,9 +46,7 @@ func CreateUser(writer http.ResponseWriter, request *http.Request) {
 	_, err = models.FetchViaMail(userPayload.Email)
 
 	if err == nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
-		writer.Write([]byte(`{"detail": "user already exist"}`))
+		utils.JSONResponse(writer, "user already exist", http.StatusBadRequest)
 		return
 	}
 
@@ -77,10 +63,7 @@ func CreateUser(writer http.ResponseWriter, request *http.Request) {
 	err = models.CreateUser(user)
 
 	if err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusInternalServerError)
-		writer.Write(
-			[]byte(`{"detail": "user creation error"}`))
+		utils.JSONResponse(writer, "user creation error", http.StatusInternalServerError)
 		return
 	}
 
@@ -112,10 +95,10 @@ func CreateUser(writer http.ResponseWriter, request *http.Request) {
 
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusCreated)
 	userJson, _ := json.Marshal(user)
-	writer.Write(userJson)
+	utils.DSJsonResponse(writer, userJson, http.StatusCreated)
+
+	return
 }
 
 // Auth godoc
@@ -134,19 +117,17 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 
 	err = json.Unmarshal(body, &loginPayload)
 	if err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusUnprocessableEntity)
-		writer.Write([]byte(`{"detail": "login body not valid"}`))
+
+		utils.JSONResponse(writer, "login body not valid", http.StatusUnprocessableEntity)
+
 		return
 	}
 
 	err = validate.Struct(loginPayload)
 	if err != nil {
 		validationError := err.(validator.ValidationErrors)
-		jsonResponse, _ := json.Marshal(map[string]string{"detail": validationError.Error()})
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
-		writer.Write(jsonResponse)
+		utils.JSONResponse(
+			writer, validationError.Error(), http.StatusBadRequest)
 		return
 
 	}
@@ -154,31 +135,29 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 	user, err := models.FetchViaMail(loginPayload.Email)
 
 	if err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusNotFound)
-		writer.Write([]byte(`{"detail": "user email/password is incorrect"}`))
+
+		utils.JSONResponse(
+			writer, "user email/password is incorrect", http.StatusNotFound)
 		return
 	}
 	if utils.ComparePasswords(user.Password, loginPayload.Password) == false {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusNotFound)
-		writer.Write([]byte(`{"detail": "user email/password is incorrect"}`))
+
+		utils.JSONResponse(
+			writer, "user email/password is incorrect", http.StatusNotFound)
 		return
 	}
 	if user.IsVerified == false {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
-		writer.Write([]byte(`{"detail": "user account is not verified"}`))
+		utils.JSONResponse(
+			writer, "user account is not verified", http.StatusBadRequest)
 		return
 
 	}
 	accessToken := utils.GenerateAccessToken(user.ID)
 	refreshToken := utils.GenerateRefreshToken(user.ID)
 	jsonResponse, _ := json.Marshal(map[string]string{"access_token": accessToken, "refresh_token": refreshToken, "account_verified": "verified"})
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusOK)
-	writer.Write(jsonResponse)
 
+	utils.DSJsonResponse(writer, jsonResponse, http.StatusOK)
+	return
 }
 
 // Auth godoc

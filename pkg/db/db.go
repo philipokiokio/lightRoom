@@ -3,7 +3,7 @@ package db
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"lightRoom/utils"
+	"lightRoom/pkg/utils"
 	"log"
 )
 

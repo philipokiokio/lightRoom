@@ -2,14 +2,14 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"lightRoom/db"
+	"lightRoom/pkg/db"
 	"time"
 )
 
 type Portfolio struct {
 	ID              uuid.UUID `gorm:"primaryKey unique not null" json:"id"`
 	Title           string    `json:"name"`
-	Description     string    `json:"description"`
+	Description     string    `gorm:"null" json:"description"`
 	Price           int       `json:"price"`
 	Tags            []Tag     `gorm:"many2many:portfolio_tags;" json:"tags"`
 	PaywalledImages []string  `gorm:"type:jsonb" json:"paywalled_images"`
@@ -26,15 +26,25 @@ type Tag struct {
 }
 
 func CreateTag(tag Tag) error {
+
 	return db.Db.Create(&tag).Error
 }
-func GetTags(title string) ([]Tag, error) {
+
+func FetchTag(title string) (Tag, error) {
+
+	var tag Tag
+	err := db.Db.Where("title = ?", title).First(&tag).Error
+	return tag, err
+
+}
+
+func GetTags(title string, limit, offset int) ([]Tag, error) {
 	query := db.Db
 	var fetchedTags []Tag
 	if len(title) > 0 {
 		query = query.Where("title ILIKE ?", "%"+title+"%")
 	}
-	err := query.Find(&fetchedTags).Error
+	err := query.Limit(limit).Offset(offset).Find(&fetchedTags).Error
 	return fetchedTags, err
 }
 func GetTag(id uuid.UUID) (Tag, error) {
@@ -45,6 +55,16 @@ func GetTag(id uuid.UUID) (Tag, error) {
 	return fetchedTag, err
 
 }
+
+func GetTagViaIds(ids []uuid.UUID) ([]Tag, error) {
+	var fetchedTags []Tag
+
+	err := db.Db.Where("id IN (?)", ids).Find(&fetchedTags).Error
+
+	return fetchedTags, err
+
+}
+
 func UpdateTagPortfolioCount(id uuid.UUID) error {
 	var existingTag Tag
 	_ = db.Db.Where("id=?", id).First(&existingTag).Error
@@ -64,7 +84,7 @@ func GetUserPortfolios(userID uuid.UUID, limit, offset int, tagID ...uuid.UUID) 
 	query := db.Db.Where("user_id=?", userID)
 
 	if len(tagID) > 0 {
-		query.Where("tags IN (?)", tagID)
+		query.Where("? = ANY(tags)", tagID)
 	}
 
 	err := query.Limit(limit).Offset(offset).Find(&userPortfolios).Error
@@ -77,10 +97,16 @@ func GetPortfolios(limit, offset int, tagID ...uuid.UUID) ([]Portfolio, error) {
 	var portfolios []Portfolio
 	query := db.Db
 	if len(tagID) > 0 {
-		query = db.Db.Where("tags in (?)", tagID)
+		query = db.Db.Where("? = ANY(tags)", tagID)
 	}
 	err := query.Limit(limit).Offset(offset).Find(&portfolios).Error
 	return portfolios, err
 }
 
 //func UpdateUserPortfolio(userID, portfolioID uuid.UUID, portfolio Portfolio) error {}
+
+func DeleteUserPortfolio(userID, portfolioID uuid.UUID) error {
+
+	return db.Db.Where("id=? And user_id=?", portfolioID, userID).Delete(&Portfolio{}).Error
+
+}
